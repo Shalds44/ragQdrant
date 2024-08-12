@@ -2,6 +2,7 @@
 
 import { ChatLayout } from "@/components/chat/chat-layout";
 import { Button } from "@/components/ui/button";
+import { useChatWithRAG } from './extendsUseChat';
 import {
   Dialog,
   DialogDescription,
@@ -32,17 +33,8 @@ export default function Home() {
     stop,
     setMessages,
     setInput,
-  } = useChat({
-    onResponse: (response) => {
-      if (response) {
-        setLoadingSubmit(false);
-      }
-    },
-    onError: (error) => {
-      setLoadingSubmit(false);
-      toast.error("An error occurred. Please try again.");
-    },
-  });
+  } = useChatWithRAG();
+
   const [chatId, setChatId] = React.useState<string>("");
   const [selectedModel, setSelectedModel] = React.useState<string>(
     getSelectedModel()
@@ -86,6 +78,7 @@ export default function Home() {
   }, [selectedModel]);
 
   const addMessage = (Message: any) => {
+    
     messages.push(Message);
     window.dispatchEvent(new Event("storage"));
     setMessages([...messages]);
@@ -99,7 +92,6 @@ export default function Home() {
 
     addMessage({ role: "user", content: input, id: chatId });
     setInput("");
-
     if (ollama) {
       try {
         const parser = new BytesOutputParser();
@@ -142,7 +134,6 @@ export default function Home() {
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoadingSubmit(true);
-
     setMessages([...messages]);
 
     // Prepare the options object with additional body data, to pass the model.
